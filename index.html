@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encrypt & Decrypt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        textarea {
+            width: 90%;
+            height: 100px;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            resize: none;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            background: #eef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            word-wrap: break-word;
+        }
+    </style>
+    <script>
+        async function encryptText() {
+            const inputText = document.getElementById("inputText").value;
+            const response = await fetch('/encrypt', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text: inputText })
+            });
+            const data = await response.json();
+            document.getElementById("encryptedText").innerText = data.encrypted_text || data.error;
+        }
+
+        async function decryptText() {
+            const encryptedText = document.getElementById("inputText").value;
+            const response = await fetch('/decrypt', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text: encryptedText })
+            });
+            const data = await response.json();
+            document.getElementById("decryptedText").innerText = data.decrypted_text || data.error;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>🔒 Encrypt & Decrypt Text</h2>
+        <textarea id="inputText" placeholder="Enter text..."></textarea><br>
+        <button onclick="encryptText()">Encrypt</button>
+        <button onclick="decryptText()">Decrypt</button>
+        
+        <h3>🔐 Encrypted Text:</h3>
+        <p class="output" id="encryptedText">...</p>
+        
+        <h3>🔓 Decrypted Text:</h3>
+        <p class="output" id="decryptedText">...</p>
+    </div>
+</body>
+</html>
