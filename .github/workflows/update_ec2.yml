@@ -1,0 +1,36 @@
+name: Auto Update AWS Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check EC2 Instance Availability
+      id: check_instance
+      run: |
+        if nc -z -v -w5 ${{ secrets.AWS_HOST }} 22; then
+          echo "Instance is reachable."
+          echo "reachable=true" >> $GITHUB_ENV
+        else
+          echo "EC2 instance is not reachable. Exiting gracefully."
+          echo "reachable=false" >> $GITHUB_ENV
+          exit 0
+        fi
+
+    - name: SSH and Pull Changes
+      if: env.reachable == 'true'  # This step runs only if the instance is reachable
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.AWS_HOST }}
+        username: ${{ secrets.AWS_USER }}
+        key: ${{ secrets.AWS_PRIVATE_KEY }}
+        script: |
+          cd /home/ec2-user/AWS_Flask_App
+          git config --global credential.helper store
+          echo "https://${{ secrets.TOKEN }}:@github.com" > ~/.git-credentials
+          git pull origin main
